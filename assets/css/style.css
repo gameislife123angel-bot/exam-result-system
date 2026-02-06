@@ -1,0 +1,89 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  transition: 0.4s;
+}
+
+body.light {
+  background: #f4f6f8;
+  color: black;
+}
+
+.app {
+  width: 360px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  padding: 25px;
+  border-radius: 22px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
+  animation: pop 0.8s ease;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+h1 {
+  text-align: center;
+}
+
+select,
+input,
+button {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+button {
+  background: #00c6ff;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.result {
+  margin-top: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.warning {
+  color: #ff4d4d;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 45px;
+  border-radius: 50%;
+}
