@@ -8,24 +8,37 @@ function toggleTheme() {
 function loadExam() {
   form.innerHTML = "";
   result.innerHTML = "";
+  lastResult = "";
 
   if (!exam.value) return;
 
   if (exam.value === "weekly") {
     form.innerHTML = `
-      <input id="weeklyMark" type="number" placeholder="Marks / 25">
+      <input id="weeklyMark" type="number" min="0" max="25"
+        placeholder="Marks / 25"
+        oninput="limit(this,25)">
       <button onclick="weekly()">Check</button>
     `;
     return;
   }
 
-  subjects.forEach(subject => {
+  let max = exam.value === "annual" ? 80 : 50;
+
+  subjects.forEach(s => {
     form.innerHTML += `
-      <input id="${subject}" type="number" placeholder="${subject}">
+      <input type="number" id="${s}"
+        min="0" max="${max}"
+        placeholder="${s} / ${max}"
+        oninput="limit(this,${max})">
     `;
   });
 
   form.innerHTML += `<button onclick="term('${exam.value}')">Check</button>`;
+}
+
+function limit(el, max) {
+  el.value = el.value.replace(/\D/g, "");
+  if (el.value > max) el.value = max;
 }
 
 function grade(p) {
@@ -37,75 +50,82 @@ function grade(p) {
   return "F";
 }
 
+/* WEEKLY */
 function weekly() {
   let m = +weeklyMark.value || 0;
-  let p = (m / 25 * 100).toFixed(2);
+  let p = ((m / 25) * 100).toFixed(2);
 
   lastResult =
-`Weekly Exam
-Marks: ${m}/25
-Percentage: ${p}%
-Grade: ${grade(p)}
-Result: ${m >= 8 ? "Pass" : "Fail"}`;
+`WEEKLY TEST (Out of 25)
+
+Marks : ${m}/25
+Percentage : ${p}%
+Grade : ${grade(p)}
+Result : ${m >= 8 ? "PASS" : "FAIL"}`;
 
   result.innerHTML = lastResult.replaceAll("\n", "<br>");
 }
 
+/* TERM / ANNUAL */
 function term(type) {
   let max = type === "annual" ? 80 : 50;
   let pass = type === "annual" ? 35 : 18;
+
   let total = 0;
   let fail = false;
+  let details = "";
 
   subjects.forEach(s => {
     let m = +document.getElementById(s).value || 0;
     total += m;
     if (m < pass) fail = true;
+    details += `${s} : ${m}/${max}\n`;
   });
 
-  let grandTotal = max * subjects.length;
-  let p = (total / grandTotal * 100).toFixed(2);
+  let grand = max * subjects.length;
+  let p = ((total / grand) * 100).toFixed(2);
 
   lastResult =
-`${type.toUpperCase()} Exam
-Total: ${total}/${grandTotal}
-Percentage: ${p}%
-Grade: ${grade(p)}
-Result: ${fail ? "Fail" : "Pass"}`;
+`${type.toUpperCase()} EXAM (Out of ${max})
+
+${details}
+Total : ${total}/${grand}
+Percentage : ${p}%
+Grade : ${grade(p)}
+Result : ${fail ? "FAIL" : "PASS"}`;
 
   result.innerHTML = lastResult.replaceAll("\n", "<br>");
 }
 
+/* PDF */
 function downloadPDF() {
-  if (!lastResult) {
-    alert("Please calculate result first");
-    return;
-  }
+  if (!lastResult) return alert("Calculate result first");
 
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
-  pdf.text("Exam Result Marksheet", 20, 20);
-  pdf.text(lastResult, 20, 40);
-  pdf.save("marksheet.pdf");
+
+  pdf.setFontSize(14);
+  pdf.text("EXAM RESULT MARKSHEET", 20, 20);
+
+  pdf.setFontSize(11);
+  pdf.text(lastResult, 20, 35);
+
+  pdf.save("Exam_Result.pdf");
 }
 
+/* PRINT */
 function printResult() {
-  if (!lastResult) {
-    alert("Please calculate result first");
-    return;
-  }
+  if (!lastResult) return alert("Calculate result first");
 
-  let win = window.open("");
-  win.document.write("<pre>" + lastResult + "</pre>");
-  win.print();
-  win.close();
+  let w = window.open("");
+  w.document.write(`<pre style="font-size:14px">${lastResult}</pre>`);
+  w.print();
+  w.close();
 }
 
+/* SHARE */
 async function shareResult() {
-  if (!lastResult) {
-    alert("Please calculate result first");
-    return;
-  }
+  if (!lastResult) return alert("Calculate result first");
 
   if (navigator.share) {
     await navigator.share({
